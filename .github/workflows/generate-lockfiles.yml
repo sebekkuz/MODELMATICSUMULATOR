@@ -1,0 +1,49 @@
+name: Generate lockfiles
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  lockfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # shared/
+      - name: Install shared
+        run: |
+          cd shared
+          npm install
+
+      # backend/
+      - name: Install backend
+        run: |
+          cd backend
+          npm install
+
+      # frontend/
+      - name: Install frontend
+        run: |
+          cd frontend
+          npm install
+
+      # commit wygenerowanych package-lock.json
+      - name: Commit lockfiles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add shared/package-lock.json backend/package-lock.json frontend/package-lock.json package-lock.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: add lockfiles for npm ci"
+            git push
+          fi
