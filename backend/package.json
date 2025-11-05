@@ -16,14 +16,14 @@
   "dependencies": {
     "fastify": "5.6.1",
     "@fastify/cors": "10.0.1",
-    "@fastify/websocket": "10.0.1",
+    "@fastify/websocket": "11.0.1",
     "zod": "3.23.8",
     "fast-csv": "5.0.1",
     "@symulator/shared": "file:../shared"
   },
   "overrides": {
     "fastify": "5.6.1",
-    "@fastify/websocket": "10.0.1",
+    "@fastify/websocket": "11.0.1",
     "@fastify/cors": "10.0.1"
   },
   "devDependencies": {
