@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "preinstall": "npm --prefix ../shared ci || npm --prefix ../shared install",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "postinstall": "npm ls fastify @fastify/websocket @fastify/cors || true"
+  }
+}
