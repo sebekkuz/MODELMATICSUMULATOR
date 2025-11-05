@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: symulator-backend
+    env: node
+    plan: starter
+    buildCommand: cd backend && npm ci && npm run build
+    startCommand: node dist/index.js
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WS_PUBLISH_INTERVAL_MS
+        value: "100"
+
+  - type: web
+    name: symulator-frontend
+    env: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: frontend/dist
