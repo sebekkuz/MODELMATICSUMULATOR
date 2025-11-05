@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { Snapshot } from "@symulator/shared/dist/sim-engine/types";
+import type { Snapshot } from "@symulator/shared";
 
 export function createWS(app: FastifyInstance) {
   const clients = new Set<any>();

@@ -2,7 +2,6 @@ import { FastifyInstance } from "fastify";
 
 export async function configRoutes(app: FastifyInstance) {
   app.post("/import/functions", async (req, rep) => {
-    // skeleton: accept raw CSV in body (string) or JSON { csv: string }
     return { imported: true, type: "functions" };
   });
   app.post("/import/housings", async () => ({ imported: true, type: "housings" }));

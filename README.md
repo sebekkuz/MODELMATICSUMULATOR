@@ -1,25 +1,21 @@
-# SYMULATORPRODUKCJI.1 — HMLV Web Simulator (skeleton)
+# SYMULATORPRODUKCJI.2 — HMLV Web Simulator (skeleton, monorepo)
 
-Monorepo: **frontend** (React + Vite + react-three-fiber), **backend** (Fastify + TypeScript), **shared** (silnik zdarzeń + schematy).
-Gotowe pod deploy na **Render.com** (statyczny front + Node backend).
+Zmiany vs .1:
+- Dodano endpoint `/api/health` (health check).
+- Dodano `engines` (Node 20) i `.nvmrc` (20.17.0) w backendzie.
+- Zaktualizowano `render.yaml` (rootDir, SPA rewrite, buildCommand używa `npm install` bez locków).
+- Frontend: helper `api.ts` (VITE_API_URL), klient WebSocket z logowaniem do Konsoli.
 
 ## Szybki start (lokalnie)
-
 ```bash
 # Backend
 cd backend
-npm ci
+npm install
 npm run build
-npm start
+npm start  # http://localhost:3000
 
-# Frontend (w drugim terminalu)
+# Frontend (drugi terminal)
 cd ../frontend
-npm ci
-npm run dev
+npm install
+npm run dev  # http://localhost:5173
 ```
-
-## Deploy na Render
-- Użyj `render.yaml` w katalogu głównym repo.
-- Zdefiniowane dwie usługi: `symulator-backend` (Node) i `symulator-frontend` (Static).
-
-Wersjonowanie: kolejne paczki **SYMULATORPRODUKCJI.X**.
