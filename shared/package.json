@@ -9,6 +9,9 @@
     "clean": "rimraf dist",
     "prepare": "npm run build"
   },
+  "dependencies": {
+    "zod": "3.23.8"
+  },
   "devDependencies": {
     "typescript": "^5.6.3",
     "@types/node": "^20.11.30",
