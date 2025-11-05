@@ -1,71 +1,51 @@
-// backend/src/index.ts
-import Fastify from "fastify";
-import cors from "@fastify/cors";
-import websocket from "@fastify/websocket";
+// backend/src/index.js
+import express from 'express';
+import cors from 'cors';
+import buildApiRouter from './apiPatch.js';
+// ⬇️ dostosuj ten import do tego, jak tworzysz/eksportujesz engine u siebie
+// np. jeśli masz klasę lub factory, zainicjalizuj ją i przypisz do const engine
+import { engine } from './sim/engine.js';
 
-import { simRoutes } from "./api/sim.routes";
-import { configRoutes } from "./api/config.routes";
-import { resultsRoutes } from "./api/results.routes";
-import { healthRoutes } from "./api/health.routes"; // jeśli masz własne trasy health
+// 1) Utwórz app - TYLKO RAZ
+const app = express();
 
-const app = Fastify({ logger: true });
+// 2) CORS – najpierw app, potem CORS
+const FRONT_ORIGIN = process.env.FRONT_ORIGIN || 'https://des-1-sjna.onrender.com';
+app.use(cors({
+  origin: FRONT_ORIGIN,
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type'],
+}));
 
-/**
- * CORS — dopuszczamy:
- *  - brak origin (curl/postman)
- *  - wszystko, jeśli CORS_ORIGIN nie ustawione
- *  - konkretne originy z ENV (rozdzielone przecinkiem)
- */
-const corsEnv = process.env.CORS_ORIGIN || "";
-const allowedOrigins = corsEnv
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+// (opcjonalnie) prosty healthcheck tutaj też
+app.get('/api/health', (req, res) => res.json({ ok: true }));
 
-app.register(cors, {
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true);
-    if (allowedOrigins.length === 0) return cb(null, true);
-    const ok = allowedOrigins.some((o) => o === origin);
-    cb(null, ok);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+// 3) Router z /api/load (autodetekcja JSON/YAML) + start/pause/reset
+//    Ważne: zamontuj PRZED globalnym express.json(), router sam używa express.text() dla /api/load
+app.use('/api', buildApiRouter(engine));
+
+// 4) Reszta parserów/middleware dla innych tras (jeśli potrzebujesz)
+app.use(express.json({ limit: '1mb' }));
+
+// 5) WebSocket – jeśli masz już gdzie indziej, NIE dubluj.
+//    Jeśli chcesz minimalistycznie, możesz zostawić tylko to, co już działało u Ciebie.
+//    Poniższe to przykładowy szkic — usuń, jeżeli masz własną konfigurację WS.
+/*
+import { createServer } from 'http';
+import { WebSocketServer } from 'ws';
+const server = createServer(app);
+const wss = new WebSocketServer({ server, path: '/ws' });
+
+wss.on('connection', (ws) => {
+  ws.send(JSON.stringify({ type: 'HELLO', msg: 'ws up' }));
+  // tu możesz przekazywać METRIC/STATE/LOG z engine do klientów
 });
+*/
 
-/** WebSocket */
-app.register(websocket);
+// 6) Port z Render
+const PORT = process.env.PORT || 10000;
 
-// Prosty endpoint WS do testów: w UI łącz z wss://.../ws
-app.get("/ws", { websocket: true }, (conn /*, req*/) => {
-  // handshake
-  try {
-    conn.socket.send(JSON.stringify({ type: "hello", ts: Date.now() }));
-  } catch {}
-
-  // echo (do diagnostyki)
-  conn.socket.on("message", (buf) => {
-    try {
-      conn.socket.send(buf);
-    } catch {}
-  });
+// 7) Start – jeśli używasz serwera HTTP dla WS, wystartuj `server.listen(PORT, ...)` zamiast app.listen
+app.listen(PORT, () => {
+  console.log(`Backend listening on port ${PORT}`);
 });
-
-/** Healthcheck (zostaw oba: własny router + prosty fallback) */
-app.get("/api/health", async () => ({ ok: true, ts: Date.now() }));
-
-/** Twoje trasy */
-app.register(simRoutes, { prefix: "/api/sim" });
-app.register(configRoutes, { prefix: "/api" });
-app.register(resultsRoutes, { prefix: "/api" });
-app.register(healthRoutes, { prefix: "/api" }); // jeśli ten plik istnieje
-
-/** Start */
-const port = Number(process.env.PORT) || 3000;
-app
-  .listen({ port, host: "0.0.0.0" })
-  .then(() => app.log.info(`Backend listening on :${port}`))
-  .catch((err) => {
-    app.log.error(err);
-    process.exit(1);
-  });
