@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import type { Snapshot } from "@symulator/shared";
+import { calcMetrics } from "../services/metrics.service";
 
 export function createWS(app: FastifyInstance) {
   const clients = new Set<any>();
@@ -9,8 +10,8 @@ export function createWS(app: FastifyInstance) {
     connection.socket.on("close", () => clients.delete(connection));
   });
 
-  const interval = setInterval(() => {
-    const snap: Snapshot = { time: Date.now()/1000, objects: [], metrics: { TAKT: 0 } };
+  setInterval(() => {
+    const snap: Snapshot = { time: Date.now()/1000, objects: [], metrics: calcMetrics() };
     broadcast({ type: "SNAPSHOT", payload: snap });
   }, Number(process.env.WS_PUBLISH_INTERVAL_MS || "1000"));
 

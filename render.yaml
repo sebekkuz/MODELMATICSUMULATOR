@@ -12,8 +12,10 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
       - key: WS_PUBLISH_INTERVAL_MS
-        value: "100"
+        value: "1000"
 
   - type: web
     name: symulator-frontend

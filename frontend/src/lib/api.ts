@@ -3,8 +3,8 @@ export const API_URL = (import.meta.env.VITE_API_URL as string) || window.locati
 export async function apiPost(path: string, body?: any) {
   const res = await fetch(`${API_URL}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined
+    headers: { "Content-Type": typeof body === "string" ? "text/plain" : "application/json" },
+    body: typeof body === "string" ? body : (body ? JSON.stringify(body) : undefined)
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json().catch(() => ({}));

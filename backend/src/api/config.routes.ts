@@ -1,13 +1,21 @@
 import { FastifyInstance } from "fastify";
+import { importFunctions, importHousings, importMrp, summary } from "../services/import.service";
 
 export async function configRoutes(app: FastifyInstance) {
   app.post("/import/functions", async (req, rep) => {
-    return { imported: true, type: "functions" };
+    const body = (req as any).body;
+    const s = importFunctions(body);
+    return s;
   });
-  app.post("/import/housings", async () => ({ imported: true, type: "housings" }));
-  app.post("/import/mrp", async () => ({ imported: true, type: "mrp" }));
-  app.post("/model", async () => ({ saved: true }));
-  app.get("/model/:id", async (req, rep) => {
-    return { id: (req.params as any).id, model: { define: {}, inputs: {} } };
+  app.post("/import/housings", async (req, rep) => {
+    const body = (req as any).body;
+    const s = importHousings(body);
+    return s;
   });
+  app.post("/import/mrp", async (req, rep) => {
+    const body = (req as any).body;
+    const s = importMrp(body);
+    return s;
+  });
+  app.get("/import/summary", async () => summary());
 }
